@@ -1,51 +1,49 @@
 const request = require('request');
+const axios = require("axios");
 const fs = require('fs');
 const path = require('path');
+const { stringify } = require('querystring');
 const folderName = 'videos';
+
+const dadosJSON = fs.readFileSync('videos.json');
+const dadosObj = JSON.parse(dadosJSON);
+//const VideoID = '7174526814059007237'
 
 if (!fs.existsSync(folderName)){
     fs.mkdirSync(folderName);
 }
 
-const url = 'https://developers.tiklydown.me/api/download?url=https%3A%2F%2Fwww.tiktok.com%2F%40ahconfeiteira%2Fvideo%2F7174526814059007237';
+let i = 0;
+  while (i < dadosObj.length) {
+  //while (i < 3) {
+      // Obter o ID do objeto atual
+      const id = dadosObj[i].id;
+      const videoName = id+`.mp4`;
 
-request.get(url, (error, response, body) => {
-  if (error) {
-    console.error(error);
-  } else {
-    console.log('statusCode:', response.statusCode);
-    console.log('headers:', response.headers);
+      const options = {
+        method: 'GET',
+        url: 'https://tiktok-scraper2.p.rapidapi.com/video/no_watermark',
+        params: {video_url: 'https://www.tiktok.com/@tiktok/video/'+id},
+        headers: {
+          'X-RapidAPI-Key': '90ee95314emsh3104ff6c0458689p1be3c0jsne01ffb7477bb',
+          'X-RapidAPI-Host': 'tiktok-scraper2.p.rapidapi.com'
+        }
+      };
 
-    try {
-      // Parse JSON from body
-      const data = JSON.parse(body);
-
-      const videoId = data.id;
-      const videoName = `${videoId}.mp4`;
-      console.log(`Nome do vídeo: ${videoName}`);
+    axios.request(options).then(function (response) {
+      const videoDL = response.data.no_watermark;
       const filePath = path.join(folderName, videoName);
 
-      console.log (data.video.noWatermark)
-
-      const videoDL = data.video.noWatermark
-
-      request.get(videoDL)
-  .on('error', (err) => {
-    console.error(err);
-  })
-  .pipe(fs.createWriteStream(filePath))
-  .on('finish', () => {
-    console.log(`Arquivo ${videoName} salvo na pasta ${folderName} com sucesso!`);
-  });
-
-      /* Check for noWatermark property
-      if (data.noWatermark) {
-        console.log('No watermark video URL:', data.noWatermark);
-      } else {
-        console.log('No noWatermark property found in the response');
-      }*/
-    } catch (e) {
-      console.error('Error parsing response body:', e);
-    }
-  }
-});
+          request.get(videoDL)
+        .on('error', (err) => {
+          console.error(err);
+        })
+        .pipe(fs.createWriteStream(filePath))
+        .on('finish', () => {
+          console.log(`Arquivo ${videoName} salvo na pasta ${folderName} com sucesso!`);
+        });
+    }).catch(function (error) {
+      console.error(error);
+    });
+i++}
+  
