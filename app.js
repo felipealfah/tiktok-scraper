@@ -1,30 +1,43 @@
-const express = require('express');
-const TikTokScraper = require('tiktok-scraper-ts');
-const { writeFile, unlink, readFile } = require('fs').promises;
+const readline = require('readline-sync')
+const fs = require('fs');
+const scraper = {
+    text: require('./robos/scraper.js')
+}
+const base = {
+    escolhe: require('./robos/baserow.js')
+}
 
-const app = express();
-const port = 8080;
+async function start (){
+    const hashtag = {}
+    hashtag.searchTerm = askAndReturnSearchTerm()
 
-app.get('/hashtag/:name', async (req, res) => {
-  const hashtagName = req.params.name;
+    await scraper.text(hashtag)
 
-  try {
-    // Verifica se o arquivo existe
-    await unlink('videos.json');
-    console.log('Arquivo existente foi excluído');
-  } catch (error) {
-    console.log('Arquivo não existente ou erro ao excluir o arquivo');
-  }
+    function askAndReturnSearchTerm(){
+        return readline.question ('Digite a Hashtag para buscar: ')
+    }
 
-  const fetchVideoHash = await TikTokScraper.hashtag(hashtagName);
-  await writeFile('videos.json', JSON.stringify(fetchVideoHash, null, 2));
+    async function baixarVideos(){
+        const download = require('./robos/download.js')
+        
+    }
+    
+    await baixarVideos();
 
-  console.log('Arquivo criado com sucesso');
+    const baseFecht = {}
+    baseFecht.base = fetchBasedeDados()
 
-  const jsonData = await readFile('videos.json', 'utf-8');
-  res.json(JSON.parse(jsonData));
-});
+    await base.escolhe(baseFecht)
 
-app.listen(port, () => {
-  console.log(`Servidor iniciado na porta ${port}`);
-});
+    function askAndReturnBase(){
+        const dadosJSON = fs.readFileSync('./credenciais/baserowapi.json');
+        const dadosObj = JSON.parse(dadosJSON);
+        const baseDados = dadosJSON.nameDatabase
+        return readline.keyInSelect(baseDados, 'Escolha a Base utilizada:')
+
+    }
+
+    await askAndReturnBase();
+
+}
+start()

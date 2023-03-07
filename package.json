@@ -42,6 +42,7 @@
     "netscape-cookies-parser": "^1.0.2",
     "node-fetch": "^2.6.7",
     "puppeteer": "^16.0.0",
+    "readline-sync": "^1.4.10",
     "request": "^2.88.2",
     "tiktok-scraper-ts": "^1.4.1",
     "tiktok-signature": "^1.7.3"
